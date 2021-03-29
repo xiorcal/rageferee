@@ -1,0 +1,23 @@
+{
+  "name": "rageferee",
+  "version": "1.0.0",
+  "description": "managing rage points since 2021",
+  "main": "rage.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xiorcal/rageferee.git"
+  },
+  "author": "xiorcal",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/xiorcal/rageferee/issues"
+  },
+  "homepage": "https://github.com/xiorcal/rageferee#readme",
+  "dependencies": {
+    "discord.js": "^12.5.1",
+    "dotenv": "^8.2.0"
+  }
+}
