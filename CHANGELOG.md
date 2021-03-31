@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.1.0](https://github.com/xiorcal/rageferee/compare/v1.0.0...v1.1.0) (2021-03-31)
+
+### Features
+
+- **workflows:** add github action to publish package ([f78b3a5](https://github.com/xiorcal/rageferee/commit/f78b3a5e14eb4ae998e4e917275820e5e4ea694e))
+
+### Other
+
+- **release:** add configuration for npm publish ([fa0861e](https://github.com/xiorcal/rageferee/commit/fa0861e0a529afb16e13a41eb804e998319d6dd4))
+
 ## 1.0.0 (2021-03-31)
 
 ### Features
