@@ -3,12 +3,15 @@
  * A ping pong bot, whenever you send "ping", it replies "pong".
  */
 
-require('dotenv').config();
-
 import * as Discord from 'discord.js';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 // Create an instance of a Discord client
-const client = new Discord.Client({ partials: ['MESSAGE', 'CHANNEL', 'REACTION'] });
+const client = new Discord.Client({
+  partials: ['MESSAGE', 'CHANNEL', 'REACTION'],
+});
 
 const helpMessage = 'TODO help message';
 
@@ -21,7 +24,7 @@ client.on('ready', () => {
 });
 
 // Create an event listener for messages
-client.on('message', message => {
+client.on('message', (message) => {
   if (!message.author.bot) {
     // If the message is "ping"
     if (message.content.startsWith('!create ')) {
@@ -31,13 +34,14 @@ client.on('message', message => {
         return;
       }
       //create a new score tracking
-      message.channel.send(createNewScoreboard(args[1], message.author)).then(message => {
-        // message.react('❓')
-        //     .then(() => message.react('➖'))
-        //     .then(() => message.react('❌'))
-      });
+      message.channel
+        .send(createNewScoreboard(args[1], message.author))
+        .then((message) => {
+          // message.react('❓')
+          //     .then(() => message.react('➖'))
+          //     .then(() => message.react('❌'))
+        });
     }
-
   }
 });
 client.on('messageReactionAdd', async (reaction, user) => {
@@ -86,10 +90,12 @@ client.on('messageReactionAdd', async (reaction, user) => {
 
     reaction.remove();
   }
-
 });
 
-const handle_reaction = (reaction: Discord.MessageReaction, user: Discord.User | Discord.PartialUser) => {
+const handle_reaction = (
+  reaction: Discord.MessageReaction,
+  user: Discord.User | Discord.PartialUser,
+) => {
   if (reaction.count > 1) {
     // already existing
   } else {
@@ -97,7 +103,10 @@ const handle_reaction = (reaction: Discord.MessageReaction, user: Discord.User |
   }
 };
 
-function createNewScoreboard(title: string, author: Discord.User): Discord.MessageEmbed {
+function createNewScoreboard(
+  title: string,
+  author: Discord.User,
+): Discord.MessageEmbed {
   const embed = new Discord.MessageEmbed()
     .setTitle(title)
     .setDescription('<@' + author.id + '>')
