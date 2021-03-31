@@ -28,22 +28,25 @@ client.on('message', (message) => {
   if (!message.author.bot) {
     // If the message is "ping"
     if (message.content.startsWith('!create ')) {
-      const args = message.content.split(' ');
-      if (args.length < 2) {
+      const title = message.content.substr(message.content.indexOf(' ') + 1);
+      if (title.length <= 0) {
         message.channel.send('Please provide a title');
         return;
       }
-      //create a new score tracking
+      //create a new scornewS tracking
       message.channel
-        .send(createNewScoreboard(args[1], message.author))
-        .then((message) => {
-          // message.react('❓')
-          //     .then(() => message.react('➖'))
-          //     .then(() => message.react('❌'))
+        .send(createNewScoreboard(title, message.author))
+        .then((newMessage) => {
+          newMessage
+            .react('❓')
+            .then(() => newMessage.react('❌'))
+            .then(() => message.delete())
+            .then(() => newMessage.pin());
         });
     }
   }
 });
+
 client.on('messageReactionAdd', async (reaction, user) => {
   // When we receive a reaction we check if the reaction is partial or not
   if (reaction.partial) {
@@ -66,20 +69,21 @@ client.on('messageReactionAdd', async (reaction, user) => {
       return;
     }
   }
-  // only manage self posted messages
-  if (reaction.message.author === client.user) {
+  // only manage self posted messages and ignore self recations
+  if (reaction.message.author === client.user && user !== client.user) {
     switch (reaction.emoji.name) {
       case '❓':
-        reaction.message.channel.send(helpMessage);
-        break;
-      case '➖':
+        reaction.message.reply(helpMessage);
+        resetReaction(reaction, '❓');
         break;
       case '❌':
-        if (reaction.message.embeds[0].author === user) {
+        const owner = reaction.message.embeds[0].footer.text;
+        if (owner === user.id) {
           reaction.message.delete();
           user.send('congrats, you deleted your scoreboard !');
         } else {
           user.send('only owner can delete a scoreboard');
+          resetReaction(reaction, '❌');
         }
         break;
 
@@ -87,21 +91,69 @@ client.on('messageReactionAdd', async (reaction, user) => {
         handle_reaction(reaction, user);
         break;
     }
-
-    reaction.remove();
   }
 });
 
-const handle_reaction = (
+function resetReaction(reaction: Discord.MessageReaction, emoji: string): void {
+  reaction.remove().then(() => reaction.message.react(emoji));
+}
+
+function handle_reaction(
   reaction: Discord.MessageReaction,
   user: Discord.User | Discord.PartialUser,
-) => {
-  if (reaction.count > 1) {
-    // already existing
+) {
+  const message = reaction.message;
+  const oldDesc = message.embeds[0]?.description ?? '';
+  const flagExistingEmoji = oldDesc.includes(reaction.emoji.name);
+  const flagExistingUser = oldDesc.includes(user.id);
+
+  let newDesc: string;
+
+  if (flagExistingEmoji) {
+    newDesc = oldDesc
+      .split('\n')
+      .map((l) => {
+        if (l.includes(reaction.emoji.name)) {
+          const [desc, score] = l.split(' : ');
+          const newScore = parseInt(score, 10) + 1;
+          return desc + ' : ' + newScore;
+        } else {
+          return l;
+        }
+      })
+      .join('\n');
   } else {
-    //new player !
+    // old player, new emoji
+    if (flagExistingUser) {
+      newDesc = oldDesc
+        .split('\n')
+        .map((l) => {
+          if (l.includes(user.id)) {
+            const [desc, score] = l.split(' : ');
+            const oldReaction = desc.match(/[^(]+\(([^)]+)\).*/)[1];
+            message.react(oldReaction).then((r) => r.remove());
+            return (
+              '<@' + user.id + '> (' + reaction.emoji.name + ') : ' + score
+            );
+          } else {
+            return l;
+          }
+        })
+        .join('\n');
+    } else {
+      // brand new player
+      newDesc =
+        oldDesc + '\n<@' + user.id + '> (' + reaction.emoji.name + ') : 0';
+    }
   }
-};
+
+  const newEmbed = new Discord.MessageEmbed(message.embeds[0]).setDescription(
+    newDesc,
+  );
+  message.edit(newEmbed);
+
+  resetReaction(reaction, reaction.emoji.name);
+}
 
 function createNewScoreboard(
   title: string,
@@ -109,8 +161,8 @@ function createNewScoreboard(
 ): Discord.MessageEmbed {
   const embed = new Discord.MessageEmbed()
     .setTitle(title)
-    .setDescription('<@' + author.id + '>')
-    .addField('<@' + author.id + '>', 1, true);
+    .setDescription('')
+    .setFooter(author.id);
 
   return embed;
 }
