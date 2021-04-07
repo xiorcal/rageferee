@@ -63,11 +63,10 @@ export class ScoreBoard {
   addPlayer(playerId: string, emoji: string): void {
     this.players.push(new Player(playerId, emoji));
   }
-  changeEmoji(playerId: string, emoji: string): void {
+  changeEmoji(playerId: string, newEmoji: string): void {
     this.players = this.players.map((p) => {
       if (p.id === playerId) {
-        p.currentEmoji = emoji;
-        return p;
+        return p.changeEmoji(newEmoji);
       } else {
         return p;
       }
@@ -76,14 +75,10 @@ export class ScoreBoard {
   increaseScore(emoji: string): void {
     this.players = this.players.map((p) => {
       if (p.currentEmoji === emoji) {
-        p.score = p.score + 1;
-        return p;
+        return p.increaseScore();
       } else {
         return p;
       }
     });
   }
-}
-function reducer(reducer: string, arg1: Player) {
-  throw new Error('Function not implemented.');
 }

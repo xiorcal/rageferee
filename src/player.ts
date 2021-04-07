@@ -17,6 +17,15 @@ export class Player {
     return new Player(id, emoji, parseInt(score, 10));
   }
 
+  changeEmoji(newEmoji: string): Player {
+    this.currentEmoji = newEmoji;
+    return this;
+  }
+  increaseScore(): Player {
+    this.score++;
+    return this;
+  }
+
   toString(): string {
     return '<@' + this.id + '> (' + this.currentEmoji + ') : ' + this.score;
   }
