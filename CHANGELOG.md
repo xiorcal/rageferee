@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.1](https://github.com/xiorcal/rageferee/compare/v1.1.0...v1.1.1) (2021-04-07)
+
+### Bug Fixes
+
+- **deletion:** improve delete message ([5c6e891](https://github.com/xiorcal/rageferee/commit/5c6e891c20a68581d0bb1eff4273af0f31441fbc)), closes [#1](https://github.com/xiorcal/rageferee/issues/1)
+- **help message:** add some meaning to the help message ([c0608bb](https://github.com/xiorcal/rageferee/commit/c0608bb7c34536c4307967f44cfc9b75fd7e6863))
+- **pin:** delete pin message ([c987008](https://github.com/xiorcal/rageferee/commit/c987008d690570d6bcdf31e0cda73a6ea3395c98))
+
 ## [1.1.0](https://github.com/xiorcal/rageferee/compare/v1.0.0...v1.1.0) (2021-03-31)
 
 ### Features
