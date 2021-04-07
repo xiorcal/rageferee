@@ -13,7 +13,11 @@ const client = new Discord.Client({
   partials: ['MESSAGE', 'CHANNEL', 'REACTION'],
 });
 
-const helpMessage = 'TODO help message';
+const helpMessage = `
+To add yourself to the board, react with an unused emoji
+To vote react with a used emoji
+To change your emoji react with an unused emoji
+(this message will delete itself after ~40 sec)`;
 
 /**
  * The ready event is vital, it means that only _after_ this will your bot start reacting to information
@@ -73,7 +77,11 @@ client.on('messageReactionAdd', async (reaction, user) => {
   if (reaction.message.author === client.user && user !== client.user) {
     switch (reaction.emoji.name) {
       case '❓':
-        reaction.message.reply(helpMessage);
+        reaction.message
+          .reply(helpMessage)
+          .then((postedHelpMessage) =>
+            postedHelpMessage.delete({ timeout: 40000 }),
+          );
         resetReaction(reaction, '❓');
         break;
       case '❌':
