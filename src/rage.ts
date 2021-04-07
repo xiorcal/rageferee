@@ -29,25 +29,33 @@ client.on('ready', () => {
 
 // Create an event listener for messages
 client.on('message', (message) => {
+  //users messages
   if (!message.author.bot) {
     // If the message is "ping"
-    if (message.content.startsWith('!create ')) {
-      const title = message.content.substr(message.content.indexOf(' ') + 1);
-      if (title.length <= 0) {
+    if (message.content.startsWith('!create')) {
+      const title = message.content.replace('!create', '').trim();
+      console.log('title : ', title);
+
+      if (!title.length) {
         message.channel.send('Please provide a title');
-        return;
+      } else {
+        //create a new scornewS tracking
+        message.channel
+          .send(createNewScoreboard(title, message.author))
+          .then((newMessage) => {
+            newMessage
+              .react('❓')
+              .then(() => newMessage.react('❌'))
+              .then(() => message.delete())
+              .then(() => newMessage.pin());
+          });
       }
-      //create a new scornewS tracking
-      message.channel
-        .send(createNewScoreboard(title, message.author))
-        .then((newMessage) => {
-          newMessage
-            .react('❓')
-            .then(() => newMessage.react('❌'))
-            .then(() => message.delete())
-            .then(() => newMessage.pin());
-        });
     }
+  }
+  // self messages
+  if (message.author === client.user) {
+    // delete pin mention
+    if (message.type === 'PINS_ADD') message.delete({ timeout: 3000 });
   }
 });
 
