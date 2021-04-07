@@ -5,6 +5,7 @@
 
 import * as Discord from 'discord.js';
 import * as dotenv from 'dotenv';
+import { ScoreBoard } from './scoreboard';
 
 dotenv.config();
 
@@ -41,7 +42,7 @@ client.on('message', (message) => {
       } else {
         //create a new scornewS tracking
         message.channel
-          .send(createNewScoreboard(title, message.author))
+          .send(createNewScoreboard(title, message.author).toEmbed())
           .then((newMessage) => {
             newMessage
               .react('❓')
@@ -85,26 +86,11 @@ client.on('messageReactionAdd', async (reaction, user) => {
   if (reaction.message.author === client.user && user !== client.user) {
     switch (reaction.emoji.name) {
       case '❓':
-        reaction.message
-          .reply(helpMessage)
-          .then((postedHelpMessage) =>
-            postedHelpMessage.delete({ timeout: 40000 }),
-          );
+        sendHelpMessage(reaction);
         resetReaction(reaction, '❓');
         break;
       case '❌':
-        const owner = reaction.message.embeds[0].footer.text;
-        if (owner === user.id) {
-          const oldState = new Discord.MessageEmbed(reaction.message.embeds[0]);
-          reaction.message.delete();
-          user.send(
-            'congrats, you deleted your scoreboard ! previous state was :',
-          );
-          user.send(oldState);
-        } else {
-          user.send('only owner can delete a scoreboard');
-          resetReaction(reaction, '❌');
-        }
+        handleDelete(reaction, user);
         break;
 
       default:
@@ -114,6 +100,28 @@ client.on('messageReactionAdd', async (reaction, user) => {
   }
 });
 
+function handleDelete(
+  reaction: Discord.MessageReaction,
+  user: Discord.User | Discord.PartialUser,
+) {
+  const owner = reaction.message.embeds[0].footer.text;
+  if (owner === user.id) {
+    const oldState = new Discord.MessageEmbed(reaction.message.embeds[0]);
+    reaction.message.delete();
+    user.send('congrats, you deleted your scoreboard ! previous state was :');
+    user.send(oldState);
+  } else {
+    user.send('only owner can delete a scoreboard');
+    resetReaction(reaction, '❌');
+  }
+}
+
+function sendHelpMessage(reaction: Discord.MessageReaction) {
+  reaction.message
+    .reply(helpMessage)
+    .then((postedHelpMessage) => postedHelpMessage.delete({ timeout: 40000 }));
+}
+
 function resetReaction(reaction: Discord.MessageReaction, emoji: string): void {
   reaction.remove().then(() => reaction.message.react(emoji));
 }
@@ -122,68 +130,15 @@ function handle_reaction(
   reaction: Discord.MessageReaction,
   user: Discord.User | Discord.PartialUser,
 ) {
-  const message = reaction.message;
-  const oldDesc = message.embeds[0]?.description ?? '';
-  const flagExistingEmoji = oldDesc.includes(reaction.emoji.name);
-  const flagExistingUser = oldDesc.includes(user.id);
-
-  let newDesc: string;
-
-  if (flagExistingEmoji) {
-    newDesc = oldDesc
-      .split('\n')
-      .map((l) => {
-        if (l.includes(reaction.emoji.name)) {
-          const [desc, score] = l.split(' : ');
-          const newScore = parseInt(score, 10) + 1;
-          return desc + ' : ' + newScore;
-        } else {
-          return l;
-        }
-      })
-      .join('\n');
-  } else {
-    // old player, new emoji
-    if (flagExistingUser) {
-      newDesc = oldDesc
-        .split('\n')
-        .map((l) => {
-          if (l.includes(user.id)) {
-            const [desc, score] = l.split(' : ');
-            const oldReaction = desc.match(/[^(]+\(([^)]+)\).*/)[1];
-            message.react(oldReaction).then((r) => r.remove());
-            return (
-              '<@' + user.id + '> (' + reaction.emoji.name + ') : ' + score
-            );
-          } else {
-            return l;
-          }
-        })
-        .join('\n');
-    } else {
-      // brand new player
-      newDesc =
-        oldDesc + '\n<@' + user.id + '> (' + reaction.emoji.name + ') : 0';
-    }
-  }
-
-  const newEmbed = new Discord.MessageEmbed(message.embeds[0]).setDescription(
-    newDesc,
-  );
-  message.edit(newEmbed);
+  const scoreBoard = ScoreBoard.from(reaction.message.embeds[0]);
+  scoreBoard.react(reaction, user);
+  reaction.message.edit(scoreBoard.toEmbed());
 
   resetReaction(reaction, reaction.emoji.name);
 }
 
-function createNewScoreboard(
-  title: string,
-  author: Discord.User,
-): Discord.MessageEmbed {
-  const embed = new Discord.MessageEmbed()
-    .setTitle(title)
-    .setDescription('')
-    .setFooter(author.id);
-
+function createNewScoreboard(title: string, author: Discord.User): ScoreBoard {
+  const embed = new ScoreBoard(author.id, title);
   return embed;
 }
 
