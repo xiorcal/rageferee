@@ -87,8 +87,12 @@ client.on('messageReactionAdd', async (reaction, user) => {
       case '❌':
         const owner = reaction.message.embeds[0].footer.text;
         if (owner === user.id) {
+          const oldState = new Discord.MessageEmbed(reaction.message.embeds[0]);
           reaction.message.delete();
-          user.send('congrats, you deleted your scoreboard !');
+          user.send(
+            'congrats, you deleted your scoreboard ! previous state was :',
+          );
+          user.send(oldState);
         } else {
           user.send('only owner can delete a scoreboard');
           resetReaction(reaction, '❌');
