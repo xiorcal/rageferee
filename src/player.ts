@@ -10,6 +10,7 @@ export class Player {
   }
 
   static regexLine = /<@([^>]+)> \(([^)]+)\) : ([0-9]+)/;
+
   static from(line: string): Player {
     const data = line.trim().match(Player.regexLine);
     // 0 full match, then capturing groups
@@ -21,6 +22,7 @@ export class Player {
     this.currentEmoji = newEmoji;
     return this;
   }
+
   increaseScore(): Player {
     this.score++;
     return this;

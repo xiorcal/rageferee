@@ -17,6 +17,20 @@ describe('Test scoreboard.ts', () => {
     });
   });
 
+  describe('testing get a player by emoji function', () => {
+    test('should return nothing', () => {
+      expect(scoreboardA.getPlayerByEmoji('toto')).toBe(undefined);
+    });
+    test('should return the player in the scoreboard', () => {
+      scoreboardA.addPlayer('toto', 'emojiToto');
+      expect(scoreboardA.getPlayerByEmoji('emojiToto')).toEqual({
+        currentEmoji: 'emojiToto',
+        id: 'toto',
+        score: 0,
+      });
+    });
+  });
+
   describe('testing include player function', () => {
     test('should be false if player not in score board', () => {
       expect(scoreboardA.includePlayer('toto')).toBe(false);

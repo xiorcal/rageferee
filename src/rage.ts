@@ -82,7 +82,7 @@ client.on('messageReactionAdd', async (reaction, user) => {
       return;
     }
   }
-  // only manage self posted messages and ignore self recations
+  // only manage self posted messages and ignore self reactions
   if (reaction.message.author === client.user && user !== client.user) {
     switch (reaction.emoji.name) {
       case '❓':
@@ -131,16 +131,26 @@ function handle_reaction(
   user: Discord.User | Discord.PartialUser,
 ) {
   const scoreBoard = ScoreBoard.from(reaction.message.embeds[0]);
-  scoreBoard.react(reaction, user);
+  const scoreIncreased = scoreBoard.react(reaction, user);
   reaction.message.edit(scoreBoard.toEmbed());
+
+  if (scoreIncreased) {
+    const targetUser = scoreBoard.getPlayerByEmoji(reaction.emoji.name);
+    reaction.message.channel
+      .send(
+        `<@${user.id}> added a point in ${scoreBoard.title} to <@${targetUser?.id}>.`,
+      )
+      .then((m) => m.delete({ timeout: 60000 }));
+  }
 
   resetReaction(reaction, reaction.emoji.name);
 }
 
 function createNewScoreboard(title: string, author: Discord.User): ScoreBoard {
-  const embed = new ScoreBoard(author.id, title);
-  return embed;
+  return new ScoreBoard(author.id, title);
 }
 
 // Log our bot in using the token from https://discord.com/developers/applications
-client.login(process.env.BOT_TOKEN);
+client.login(process.env.BOT_TOKEN).catch((err) => {
+  console.error('Something went wrong while starting the rageferee: ', err);
+});

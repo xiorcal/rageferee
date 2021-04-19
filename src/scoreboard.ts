@@ -26,9 +26,14 @@ export class ScoreBoard {
     return result;
   }
 
+  getPlayerByEmoji(emoji: string): Player {
+    return this.players.filter((p) => p.currentEmoji === emoji)[0];
+  }
+
   includePlayer(playerId: string): boolean {
     return this.players.filter((p) => p.id === playerId).length > 0;
   }
+
   includeEmoji(emoji: string): boolean {
     return this.players.filter((p) => p.currentEmoji === emoji).length > 0;
   }
@@ -43,11 +48,14 @@ export class ScoreBoard {
   react(
     reaction: Discord.MessageReaction,
     user: Discord.User | Discord.PartialUser,
-  ): ScoreBoard {
+  ): boolean {
     const emoji = reaction.emoji.name;
     const playerId = user.id;
+    let scoreIncreased = false;
+
     if (this.includeEmoji(emoji)) {
       this.increaseScore(emoji);
+      scoreIncreased = true;
     } else {
       if (this.includePlayer(playerId)) {
         //old player
@@ -58,11 +66,13 @@ export class ScoreBoard {
       }
     }
 
-    return this;
+    return scoreIncreased;
   }
+
   addPlayer(playerId: string, emoji: string): void {
     this.players.push(new Player(playerId, emoji));
   }
+
   changeEmoji(playerId: string, newEmoji: string): void {
     this.players = this.players.map((p) => {
       if (p.id === playerId) {
@@ -72,6 +82,7 @@ export class ScoreBoard {
       }
     });
   }
+
   increaseScore(emoji: string): void {
     this.players = this.players.map((p) => {
       if (p.currentEmoji === emoji) {
