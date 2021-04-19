@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.2.0](https://github.com/xiorcal/rageferee/compare/v1.1.2...v1.2.0) (2021-04-19)
+
+### Features
+
+- **score:** send a message after a user increase someone's score ([9c7a876](https://github.com/xiorcal/rageferee/commit/9c7a876ad99cb1b8c0120def08d2134a726f67cb)), closes [#8](https://github.com/xiorcal/rageferee/issues/8)
+
 ### [1.1.2](https://github.com/xiorcal/rageferee/compare/v1.1.1...v1.1.2) (2021-04-07)
 
 ### [1.1.1](https://github.com/xiorcal/rageferee/compare/v1.1.0...v1.1.1) (2021-04-07)
