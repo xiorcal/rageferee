@@ -5,7 +5,7 @@
   "main": "dist/rage.js",
   "types": "dist/rage.d.ts",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -p tsconfig.json",
     "start": "tsc -p tsconfig.json && node dist/rage.js",
     "watch": "tsc -p tsconfig.json -w",
     "test": "jest",
@@ -26,7 +26,9 @@
   "homepage": "https://github.com/xiorcal/rageferee#readme",
   "dependencies": {
     "discord.js": "^12.5.1",
-    "dotenv": "^8.2.0"
+    "dotenv": "^8.2.0",
+    "rss-parser": "^3.12.0",
+    "stormdb": "^0.4.1"
   },
   "devDependencies": {
     "@commitlint/cli": "^12.0.1",

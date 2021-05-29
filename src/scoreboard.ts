@@ -26,6 +26,13 @@ export class ScoreBoard {
     return result;
   }
 
+  toEmbed(): Discord.MessageEmbed {
+    return new Discord.MessageEmbed()
+      .setTitle(this.title)
+      .setDescription(this.players.sort((a, b) => b.score - a.score).join('\n'))
+      .setFooter(this.ownerId);
+  }
+
   getPlayerByEmoji(emoji: string): Player {
     return this.players.filter((p) => p.currentEmoji === emoji)[0];
   }
@@ -36,13 +43,6 @@ export class ScoreBoard {
 
   includeEmoji(emoji: string): boolean {
     return this.players.filter((p) => p.currentEmoji === emoji).length > 0;
-  }
-
-  toEmbed(): Discord.MessageEmbed {
-    return new Discord.MessageEmbed()
-      .setTitle(this.title)
-      .setDescription(this.players.sort((a, b) => b.score - a.score).join('\n'))
-      .setFooter(this.ownerId);
   }
 
   react(

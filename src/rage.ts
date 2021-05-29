@@ -6,8 +6,23 @@
 import * as Discord from 'discord.js';
 import * as dotenv from 'dotenv';
 import { ScoreBoard } from './scoreboard';
+import StormDB from 'stormdb';
+import { Freebies } from './freeGamez';
 
 dotenv.config();
+
+const prefix = '!';
+const storage_filename = 'freebies_channels.json';
+const half_an_hour = 1000 * 60 * 30;
+
+const engine = new StormDB.localFileEngine(storage_filename);
+const db = new StormDB(engine);
+db.default({ chans: [] });
+
+const freebiesHandler = new Freebies(
+  'https://www.indiegamebundles.com/category/free/feed/',
+  'freebies_data.json',
+);
 
 // Create an instance of a Discord client
 const client = new Discord.Client({
@@ -33,24 +48,8 @@ client.on('message', (message) => {
   //users messages
   if (!message.author.bot) {
     // If the message is "ping"
-    if (message.content.startsWith('!create')) {
-      const title = message.content.replace('!create', '').trim();
-      console.log('title : ', title);
-
-      if (!title.length) {
-        message.channel.send('Please provide a title');
-      } else {
-        //create a new scornewS tracking
-        message.channel
-          .send(createNewScoreboard(title, message.author).toEmbed())
-          .then((newMessage) => {
-            newMessage
-              .react('❓')
-              .then(() => newMessage.react('❌'))
-              .then(() => message.delete())
-              .then(() => newMessage.pin());
-          });
-      }
+    if (message.content.startsWith(prefix)) {
+      handleCommand(message);
     }
   }
   // self messages
@@ -100,6 +99,47 @@ client.on('messageReactionAdd', async (reaction, user) => {
   }
 });
 
+function handleCommand(message: Discord.Message) {
+  const rawInput = message.content.slice(prefix.length).trim().split(' ');
+  const command = rawInput.shift().toLowerCase();
+  const args = rawInput;
+  switch (command) {
+    case 'create':
+      handleCreate(message, args.join(' '));
+      break;
+    case 'logs':
+      handleLogs(message);
+      break;
+    case 'replace_miraltar':
+      handleRegisterFreebies(message);
+      break;
+    default:
+      break;
+  }
+}
+
+function handleCreate(message: Discord.Message, title: string) {
+  if (!title.length) {
+    message.channel.send('Please provide a title');
+  } else {
+    //create a new scoreboard tracking
+    message.channel
+      .send(createNewScoreboard(title, message.author).toEmbed())
+      .then((newMessage) => {
+        newMessage
+          .react('❓')
+          .then(() => newMessage.react('❌'))
+          .then(() => message.delete())
+          .then(() => newMessage.pin());
+      });
+  }
+}
+
+function handleLogs(message: Discord.Message) {
+  console.log(message);
+  return;
+}
+
 function handleDelete(
   reaction: Discord.MessageReaction,
   user: Discord.User | Discord.PartialUser,
@@ -113,6 +153,17 @@ function handleDelete(
   } else {
     user.send('only owner can delete a scoreboard');
     resetReaction(reaction, '❌');
+  }
+}
+function handleRegisterFreebies(message: Discord.Message) {
+  const chanId = message.channel.id;
+  const current_chans: string[] = db.get('chans').value();
+  if (current_chans.indexOf(chanId) === -1) {
+    current_chans.push(chanId);
+    db.set('chans', current_chans).save();
+    message.channel.send('registered');
+  } else {
+    message.channel.send('already registered');
   }
 }
 
@@ -154,3 +205,26 @@ function createNewScoreboard(title: string, author: Discord.User): ScoreBoard {
 client.login(process.env.BOT_TOKEN).catch((err) => {
   console.error('Something went wrong while starting the rageferee: ', err);
 });
+
+setTimeout(() => {
+  checkAndPublishFreebies();
+}, 5000);
+
+function checkAndPublishFreebies() {
+  freebiesHandler.getNewFreebies().then((newOnes) => {
+    if (newOnes.length > 0) {
+      const channels: string[] = db.get('chans').value();
+      channels.forEach((chan) => {
+        const channel = client.channels.cache.get(chan);
+        if (channel.isText()) {
+          newOnes.forEach((freebie) => {
+            channel.send(freebie.toDiscordMessage());
+          });
+        }
+      });
+    }
+    setTimeout(() => {
+      checkAndPublishFreebies();
+    }, half_an_hour);
+  });
+}
