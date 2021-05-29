@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.3.0](https://github.com/xiorcal/rageferee/compare/v1.2.0...v1.3.0) (2021-05-29)
+
+### Features
+
+- **freebies:** the bot can advertise free games ([bf48f5d](https://github.com/xiorcal/rageferee/commit/bf48f5dda7cbbfa565458d9419e358b7eb93b09b))
+
 ## [1.2.0](https://github.com/xiorcal/rageferee/compare/v1.1.2...v1.2.0) (2021-04-19)
 
 ### Features

@@ -1,6 +1,6 @@
 {
   "name": "rageferee",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "managing rage points since 2021",
   "main": "dist/rage.js",
   "types": "dist/rage.d.ts",
