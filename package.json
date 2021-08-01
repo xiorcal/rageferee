@@ -27,6 +27,7 @@
   "dependencies": {
     "discord.js": "^12.5.1",
     "dotenv": "^8.2.0",
+    "node-cron": "^3.0.0",
     "rss-parser": "^3.12.0",
     "stormdb": "^0.4.1"
   },
@@ -35,6 +36,7 @@
     "@commitlint/config-conventional": "^12.0.1",
     "@types/jest": "^26.0.22",
     "@types/node": "^14.14.37",
+    "@types/node-cron": "^2.0.3",
     "@typescript-eslint/eslint-plugin": "^4.20.0",
     "@typescript-eslint/parser": "^4.20.0",
     "eslint": "^7.23.0",

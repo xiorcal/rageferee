@@ -8,12 +8,13 @@ import * as dotenv from 'dotenv';
 import { ScoreBoard } from './scoreboard';
 import StormDB from 'stormdb';
 import { Freebies } from './freeGamez';
+import * as cron from 'node-cron';
 
 dotenv.config();
 
 const prefix = '!';
 const storage_filename = 'freebies_channels.json';
-const half_an_hour = 1000 * 60 * 30;
+const cron_every_30min = '*/30 * * * * *';
 
 const engine = new StormDB.localFileEngine(storage_filename);
 const db = new StormDB(engine);
@@ -157,13 +158,15 @@ function handleDelete(
 }
 function handleRegisterFreebies(message: Discord.Message) {
   const chanId = message.channel.id;
-  const current_chans: string[] = db.get('chans').value();
+  let current_chans: string[] = db.get('chans').value();
   if (current_chans.indexOf(chanId) === -1) {
     current_chans.push(chanId);
     db.set('chans', current_chans).save();
     message.channel.send('registered');
   } else {
-    message.channel.send('already registered');
+    message.channel.send('already registered, removing');
+    current_chans = current_chans.filter((chan) => chan !== chanId);
+    db.set('chans', current_chans).save();
   }
 }
 
@@ -189,7 +192,7 @@ function handle_reaction(
     const targetUser = scoreBoard.getPlayerByEmoji(reaction.emoji.name);
     reaction.message.channel
       .send(
-        `<@${user.id}> added a point in ${scoreBoard.title} to <@${targetUser?.id}>.`,
+        `||<@${user.id}>|| voted for <@${targetUser?.id}> (${scoreBoard.title}).`,
       )
       .then((m) => m.delete({ timeout: 60000 }));
   }
@@ -206,25 +209,37 @@ client.login(process.env.BOT_TOKEN).catch((err) => {
   console.error('Something went wrong while starting the rageferee: ', err);
 });
 
-setTimeout(() => {
-  checkAndPublishFreebies();
-}, 5000);
-
 function checkAndPublishFreebies() {
-  freebiesHandler.getNewFreebies().then((newOnes) => {
-    if (newOnes.length > 0) {
-      const channels: string[] = db.get('chans').value();
-      channels.forEach((chan) => {
-        const channel = client.channels.cache.get(chan);
-        if (channel.isText()) {
-          newOnes.forEach((freebie) => {
-            channel.send(freebie.toDiscordMessage());
-          });
-        }
-      });
-    }
-    setTimeout(() => {
-      checkAndPublishFreebies();
-    }, half_an_hour);
-  });
+  freebiesHandler
+    .getNewFreebies()
+    .then((newOnes) => {
+      if (newOnes.length > 0) {
+        const channels: string[] = db.get('chans').value();
+        channels.forEach((chan) => {
+          const channel = client.channels.cache.get(chan);
+          if (channel.isText()) {
+            newOnes.forEach((freebie) => {
+              channel.send(freebie.toDiscordMessage());
+            });
+          }
+        });
+      }
+    })
+    .catch((error) => {
+      console.error(error);
+    });
 }
+
+const task = cron.schedule(
+  cron_every_30min,
+  () => {
+    checkAndPublishFreebies();
+  },
+  {
+    scheduled: false,
+  },
+);
+
+setTimeout(() => {
+  task.start();
+}, 5000);
