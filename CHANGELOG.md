@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.4.0](https://github.com/xiorcal/rageferee/compare/v1.3.0...v1.4.0) (2021-10-01)
+
+### Features
+
+- now play some youtube ([4d90d7b](https://github.com/xiorcal/rageferee/commit/4d90d7bf1321337210630579f71eebbafda45af7))
+
+### Bug Fixes
+
+- multiple (see body) ([83a0ab9](https://github.com/xiorcal/rageferee/commit/83a0ab98e3d2277445de557cd9ea2385c7795bbb))
+
 ## [1.3.0](https://github.com/xiorcal/rageferee/compare/v1.2.0...v1.3.0) (2021-05-29)
 
 ### Features
