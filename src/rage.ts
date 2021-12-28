@@ -16,8 +16,6 @@ const prefix = '!';
 const storage_filename = 'freebies_channels.json';
 const cron_every_30min = '*/30 * * * * *';
 
-const queues = new Map();
-
 const engine = new StormDB.localFileEngine(storage_filename);
 const db = new StormDB(engine);
 db.default({ chans: [] });
