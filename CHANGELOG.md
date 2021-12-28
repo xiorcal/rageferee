@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.4.1](https://github.com/xiorcal/rageferee/compare/v1.4.0...v1.4.1) (2021-12-28)
+
+### Bug Fixes
+
+- removed unused variable ([6300bc8](https://github.com/xiorcal/rageferee/commit/6300bc896935b728d1f5c67588ba6b9a8e44c67e))
+
 ## [1.4.0](https://github.com/xiorcal/rageferee/compare/v1.3.0...v1.4.0) (2021-10-01)
 
 ### Features
