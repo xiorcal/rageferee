@@ -23,8 +23,17 @@ export class Player {
     return this;
   }
 
+  addScore(scoreDelta: number): void {
+    this.score += scoreDelta;
+  }
+
   increaseScore(): Player {
-    this.score++;
+    this.addScore(1);
+    return this;
+  }
+
+  decreaseScore(): Player {
+    this.addScore(-1);
     return this;
   }
 

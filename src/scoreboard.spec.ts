@@ -213,7 +213,7 @@ describe('Test scoreboard.ts', () => {
       const result = scoreboardB.toEmbed();
       const expected = `<@toto> (emojiToto) : 0
 <@titi> (emojiTiti) : 0`;
-      expect(result.description).toBe(expected);
+      expect(result.data.description).toBe(expected);
     });
     test('should correctly display a scoreboard with players ordered', () => {
       scoreboardB.increaseScore('emojiTiti');
@@ -221,7 +221,7 @@ describe('Test scoreboard.ts', () => {
       const result = scoreboardB.toEmbed();
       const expected = `<@titi> (emojiTiti) : 2
 <@toto> (emojiToto) : 0`;
-      expect(result.description).toBe(expected);
+      expect(result.data.description).toBe(expected);
     });
   });
 

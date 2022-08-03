@@ -1,6 +1,12 @@
 import * as Discord from 'discord.js';
 import { Player } from './player';
 
+type reactResponse = {
+  scoreUpdated: boolean;
+  inputEmoji: string;
+  oldEmoji: string;
+};
+
 export class ScoreBoard {
   players: Player[];
   title: string;
@@ -12,8 +18,9 @@ export class ScoreBoard {
     this.players = [];
   }
 
-  static from(embed: Discord.MessageEmbed): ScoreBoard {
-    const result = new ScoreBoard(embed.footer.text, embed.title);
+  static from(embed: Discord.Embed): ScoreBoard {
+    const ownerId = embed.footer.text.split('_')[0];
+    const result = new ScoreBoard(ownerId, embed.title);
 
     const split = (embed.description ?? '').split('\n');
 
@@ -26,11 +33,18 @@ export class ScoreBoard {
     return result;
   }
 
-  toEmbed(): Discord.MessageEmbed {
-    return new Discord.MessageEmbed()
+  toEmbed(): Discord.EmbedBuilder {
+    const embed = new Discord.EmbedBuilder()
       .setTitle(this.title)
-      .setDescription(this.players.sort((a, b) => b.score - a.score).join('\n'))
-      .setFooter(this.ownerId);
+      .setDescription(this.getDescription())
+      .setFooter({ text: this.ownerId });
+    return embed;
+  }
+  getDescription(): string {
+    if (this.players.length > 0) {
+      return this.players.sort((a, b) => b.score - a.score).join('\n');
+    }
+    return null;
   }
 
   getPlayerByEmoji(emoji: string): Player {
@@ -48,8 +62,9 @@ export class ScoreBoard {
   react(
     reaction: Discord.MessageReaction,
     user: Discord.User | Discord.PartialUser,
-  ): boolean {
+  ): reactResponse {
     const emoji = reaction.emoji.name;
+    let oldEmoji = emoji;
     const playerId = user.id;
     let scoreIncreased = false;
 
@@ -59,28 +74,31 @@ export class ScoreBoard {
     } else {
       if (this.includePlayer(playerId)) {
         //old player
-        this.changeEmoji(playerId, emoji);
+        oldEmoji = this.changeEmoji(playerId, emoji);
       } else {
         // new player
         this.addPlayer(playerId, emoji);
       }
     }
 
-    return scoreIncreased;
+    return { scoreUpdated: scoreIncreased, inputEmoji: emoji, oldEmoji };
   }
 
   addPlayer(playerId: string, emoji: string): void {
     this.players.push(new Player(playerId, emoji));
   }
 
-  changeEmoji(playerId: string, newEmoji: string): void {
+  changeEmoji(playerId: string, newEmoji: string): string {
+    let oldEmoji = '';
     this.players = this.players.map((p) => {
       if (p.id === playerId) {
+        oldEmoji = p.currentEmoji;
         return p.changeEmoji(newEmoji);
       } else {
         return p;
       }
     });
+    return oldEmoji;
   }
 
   increaseScore(emoji: string): void {
@@ -91,5 +109,58 @@ export class ScoreBoard {
         return p;
       }
     });
+  }
+}
+
+export class ScoreBoardAdmin extends ScoreBoard {
+  originalChannelId: string;
+  originalId: string;
+
+  constructor(embed: Discord.Embed, chan: string, id: string) {
+    const ownerId = embed.footer.text.split('_')[0];
+
+    super(ownerId, embed.title);
+    const split = (embed.description ?? '').split('\n');
+
+    for (const line of split) {
+      if (line.length > 1) {
+        this.players.push(Player.from(line));
+      }
+    }
+    this.originalChannelId = chan;
+    this.originalId = id;
+  }
+
+  resetScores(): void {
+    for (const player of this.players) {
+      player.score = 0;
+    }
+  }
+
+  decreaseScore(emoji: string): void {
+    this.players = this.players.map((p) => {
+      if (p.currentEmoji === emoji) {
+        return p.score > 0 ? p.decreaseScore() : p;
+      } else {
+        return p;
+      }
+    });
+  }
+
+  toAdminEmbed(): Discord.EmbedBuilder {
+    const res = super.toEmbed();
+
+    const admin_footer =
+      res.data.footer.text +
+      '_' +
+      this.originalChannelId +
+      '_' +
+      this.originalId;
+    res.setFooter({ text: admin_footer });
+    return res;
+  }
+  static fromAdminEmbed(embed: Discord.Embed): ScoreBoardAdmin {
+    const split = embed.footer.text.split('_');
+    return new ScoreBoardAdmin(embed, split[1], split[2]);
   }
 }

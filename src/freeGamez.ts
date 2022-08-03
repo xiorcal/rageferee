@@ -13,11 +13,11 @@ class Freebie {
   categories: string[];
   description: string;
   toDiscordMessage = () => {
-    const message = new Discord.MessageEmbed()
+    const message = new Discord.EmbedBuilder()
       .setTitle(this.title)
       .setDescription(this.description)
-      .setURL(this.link);
-    message.addField('categories', this.categories);
+      .setURL(this.link)
+      .addFields({ name: 'categories', value: this.categories.join(',') });
     return message;
   };
   constructor(
@@ -85,3 +85,12 @@ export class Freebies {
     };
   }
 }
+
+// const freebiesHandler = new Freebies(
+//   'https://www.indiegamebundles.com/category/free/feed/',
+//   'freebies_data.json',
+// );
+
+// freebiesHandler.getNewFreebies().then(
+//   freebies => console.log(freebies)
+// )
